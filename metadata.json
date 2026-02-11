@@ -1,0 +1,7 @@
+{
+  "name": "Prescriptly",
+  "description": "An AI-powered online pharmacy frontend focusing on trust, ease of use, and medical professionalism.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

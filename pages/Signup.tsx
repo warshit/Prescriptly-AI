@@ -46,13 +46,8 @@ export const Signup: React.FC = () => {
       navigate('/');
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/email-already-in-use') {
-        setError('An account with this email already exists.');
-      } else if (err.code === 'auth/weak-password') {
-        setError('Password is too weak.');
-      } else {
-        setError('Failed to create account. Please try again.');
-      }
+      // Display the error message from the auth context
+      setError(err.message || 'Failed to create account. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -66,7 +61,8 @@ export const Signup: React.FC = () => {
       navigate('/');
     } catch (err: any) {
       console.error(err);
-      setError('Failed to sign in with Google. Please try again.');
+      // Display the error message from the auth context
+      setError(err.message || 'Failed to sign in with Google. Please try again.');
     } finally {
       setIsLoading(false);
     }

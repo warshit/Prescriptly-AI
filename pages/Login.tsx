@@ -37,17 +37,15 @@ export const Login: React.FC = () => {
     }
 
     setError('');
+    setMessage('');
     setIsLoading(true);
     try {
       await login(formData.email, formData.password);
       navigate(from, { replace: true });
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Invalid email or password.');
-      } else {
-        setError('Failed to log in. Please try again.');
-      }
+      // Display the error message from the auth context
+      setError(err.message || 'Failed to log in. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +60,8 @@ export const Login: React.FC = () => {
       navigate(from, { replace: true });
     } catch (err: any) {
       console.error(err);
-      setError('Failed to sign in with Google. Please try again.');
+      // Display the error message from the auth context
+      setError(err.message || 'Failed to sign in with Google. Please try again.');
     } finally {
       setIsLoading(false);
     }

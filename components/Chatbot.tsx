@@ -14,6 +14,62 @@ interface Message {
   sender: 'user' | 'bot';
 }
 
+// Helper function to format markdown-style text for better readability
+const formatBotMessage = (text: string): React.ReactElement => {
+  // Split by lines
+  const lines = text.split('\n');
+  const elements: React.ReactElement[] = [];
+  
+  lines.forEach((line, index) => {
+    // Skip empty lines but add spacing
+    if (line.trim() === '') {
+      elements.push(<div key={`space-${index}`} className="h-2" />);
+      return;
+    }
+
+    // Handle bold text **text**
+    let formattedLine = line;
+    const boldRegex = /\*\*(.+?)\*\*/g;
+    const parts: (string | React.ReactElement)[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = boldRegex.exec(formattedLine)) !== null) {
+      // Add text before the match
+      if (match.index > lastIndex) {
+        parts.push(formattedLine.substring(lastIndex, match.index));
+      }
+      // Add bold text
+      parts.push(<strong key={`bold-${index}-${match.index}`} className="font-bold text-slate-900">{match[1]}</strong>);
+      lastIndex = match.index + match[0].length;
+    }
+    // Add remaining text
+    if (lastIndex < formattedLine.length) {
+      parts.push(formattedLine.substring(lastIndex));
+    }
+
+    // Check if it's a bullet point
+    const bulletMatch = line.match(/^[\s]*[\*\-•]\s+(.+)$/);
+    if (bulletMatch) {
+      elements.push(
+        <div key={`line-${index}`} className="flex gap-2 ml-2 my-1">
+          <span className="text-medical-600 font-bold flex-shrink-0">•</span>
+          <span className="flex-1">{parts.length > 0 ? parts : bulletMatch[1]}</span>
+        </div>
+      );
+    } else {
+      // Regular paragraph
+      elements.push(
+        <p key={`line-${index}`} className="my-1">
+          {parts.length > 0 ? parts : line}
+        </p>
+      );
+    }
+  });
+
+  return <div className="space-y-1">{elements}</div>;
+};
+
 export const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
@@ -211,12 +267,25 @@ Always be helpful and provide context-aware responses based on their prescriptio
             ${prescriptionContext}
 
             *** RULES ***
-            1. Use short, clear paragraphs.
-            2. If the user wants to buy something, call the 'addToCart' tool.
-            3. ONLY suggest medicines from the INVENTORY.
-            4. If a user describes symptoms, suggest relevant OTC medicines from the inventory, but advise consulting a doctor.
-            5. If the user asks for a medicine not in inventory, apologize and say it's unavailable.
-            6. **CLEAR CART RULE**: If the user asks to clear, empty, or remove all items from the cart, you MUST ask for confirmation first (e.g., "Are you sure you want to clear your cart?"). ONLY call the 'clearCart' tool if the user explicitly confirms (yes, sure, do it).
+            1. Use short, clear paragraphs with proper spacing.
+            2. When listing items, use bullet points with "* " at the start of each line.
+            3. Use **bold** for important terms (medicine names, diagnoses, warnings).
+            4. Add blank lines between different sections for better readability.
+            5. If the user wants to buy something, call the 'addToCart' tool.
+            6. ONLY suggest medicines from the INVENTORY.
+            7. If a user describes symptoms, suggest relevant OTC medicines from the inventory, but advise consulting a doctor.
+            8. If the user asks for a medicine not in inventory, apologize and say it's unavailable.
+            9. **CLEAR CART RULE**: If the user asks to clear, empty, or remove all items from the cart, you MUST ask for confirmation first (e.g., "Are you sure you want to clear your cart?"). ONLY call the 'clearCart' tool if the user explicitly confirms (yes, sure, do it).
+
+            *** FORMATTING EXAMPLES ***
+            Good:
+            "Based on your prescription, you have **URTI** (Upper Respiratory Tract Infection).
+            
+            Your prescribed medicines are:
+            * **Paracetamol 500mg** - For fever and pain relief
+            * **Amoxicillin 250mg** - Antibiotic for infection
+            
+            Would you like me to add these to your cart?"
 
             *** SAFETY ***
             - For serious symptoms (chest pain, breathing trouble), tell them to seek emergency help immediately.
@@ -356,12 +425,12 @@ Always be helpful and provide context-aware responses based on their prescriptio
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
             {messages.map((msg) => (
                <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                  <div className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed ${
                      msg.sender === 'user' 
                      ? 'bg-medical-600 text-white rounded-br-none' 
                      : 'bg-white text-slate-700 border border-slate-200 rounded-bl-none shadow-sm'
                   }`}>
-                     {msg.text}
+                     {msg.sender === 'bot' ? formatBotMessage(msg.text) : msg.text}
                   </div>
                </div>
             ))}

@@ -10,7 +10,7 @@ import { usePrescription } from '../context/PrescriptionContext';
 
 export const Upload: React.FC = () => {
   const { addToCart: globalAddToCart } = useCart();
-  const { setLastScannedItems } = usePrescription();
+  const { setLastScannedItems, setPrescriptionData } = usePrescription();
   
   // Upload State
   const [isDragging, setIsDragging] = useState(false);
@@ -91,7 +91,7 @@ export const Upload: React.FC = () => {
         reader.readAsDataURL(file);
       });
 
-      // 4. Call Gemini API
+      // 4. Call Gemini API for medicine extraction
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: {
@@ -134,7 +134,29 @@ export const Upload: React.FC = () => {
         }
       });
 
-      // 5. Parse Results
+      // 5. Get detailed prescription analysis for chatbot context
+      const analysisResponse = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: {
+          parts: [
+            { inlineData: { mimeType: file.type, data: base64Data } },
+            { 
+              text: `Analyze this prescription image and provide a detailed summary including:
+              - Patient information (if visible)
+              - Doctor information (if visible)
+              - List of all medicines with dosage and frequency
+              - Any special instructions or notes
+              - Date of prescription (if visible)
+              
+              Format the response in a clear, structured way.`
+            }
+          ]
+        }
+      });
+
+      const analysisText = analysisResponse.text;
+
+      // 6. Parse Results
       const resultText = response.text;
       if (!resultText) throw new Error("No data returned from AI");
       
@@ -203,8 +225,14 @@ export const Upload: React.FC = () => {
         setScanError("We couldn't identify any clear medicine names. Please try a clearer image.");
       } else {
         setScannedItems(newItems);
-        // Sync with global context
+        // Sync with global context including prescription data
         setLastScannedItems(newItems);
+        setPrescriptionData({
+          imageBase64: base64Data,
+          fileName: file.name,
+          uploadedAt: new Date(),
+          analysisText: analysisText
+        });
         setScanComplete(true);
       }
 

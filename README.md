@@ -52,27 +52,7 @@ Prescriptly AI is a modern, AI-powered online pharmacy platform that revolutioni
 - Category-based filtering
 - Search functionality
 
-## 🏗️ Technical Architecture
 
-### Frontend Stack
-- **Framework**: React 19.2.4
-- **Language**: TypeScript 5.8.2
-- **Build Tool**: Vite 6.2.0
-- **Routing**: React Router DOM 7.13.0
-- **Icons**: Lucide React 0.563.0
-- **Styling**: Tailwind CSS (utility-first)
-
-### Backend Services
-- **Authentication**: Firebase Auth 12.8.0
-- **AI Engine**: Google Gemini AI 1.39.0
-- **Image Analysis**: Gemini Vision API
-- **Natural Language Processing**: Gemini Chat API
-
-### State Management
-- **Context API**: 
-  - `AuthContext` - User authentication state
-  - `CartContext` - Shopping cart management
-  - `PrescriptionContext` - Prescription data and analysis
 
 ## 📁 Project Structure
 
@@ -272,12 +252,6 @@ Contributions are welcome! Please follow these steps:
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-## 👥 Team
-
-- **Developer**: Warshit
-- **AI Integration**: Google Gemini AI
-- **Authentication**: Firebase
 
 
 
